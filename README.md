@@ -18,14 +18,16 @@ block, your own data.
 
 | Time | Block | Slides | Notebook |
 |---|---|---|---|
-| 09:00–09:30 | **Introduction and preparation of the working environment** — scientific Python, installing `apsg` and `petropandas`, the philosophy of both packages (object-oriented `apsg`, DataFrame-integrated `petropandas`) | `slides/00_intro.pdf` | — |
-| 09:30–11:00 | **Block 1: Structural geology with `apsg`** — vectors, lineations, foliations, pairs and faults; stereonets with points, great circles and density contours; eigenvectors, spherical statistics, mean orientation and fold axes. *Exercise:* field measurements from CSV → stereogram → vector graphics for publication | `slides/01_apsg_basics.pdf` | `notebooks/01_apsg_basics.ipynb` |
+| 09:00–09:30 | **Introduction** — scientific Python, installing `apsg` and `petropandas`, philosophy of both packages | `00_intro.pdf` | — |
+| 09:30–11:00 | **Block 1: Structural geology with `apsg`** — features, stereonets, contours, orientation statistics, fold axes. *Exercise:* field data → stereogram → vector graphics | `01_apsg_basics.pdf` | `01_apsg_basics.ipynb` |
 | 11:00–11:15 | *Coffee break* | | |
-| 11:15–12:30 | **Block 2: Advanced structural and tensor analysis** — fault-slip data and sense of movement, deformation and stress tensors, stress inversion from fault data. *Exercise:* progressive deformation and superposition, processing a set of brittle structures | `slides/02_apsg_advanced.pdf` | `notebooks/02_apsg_advanced.ipynb` |
+| 11:15–12:30 | **Block 2: Advanced structural and tensor analysis** — faults and right dihedra, finite strain, strain markers, stress inversion. *Exercise:* superposition of deformations, brittle structures | `02_apsg_advanced.pdf` | `02_apsg_advanced.ipynb` |
 | 12:30–13:30 | *Lunch break* | | |
-| 13:30–15:00 | **Block 3: Processing petrological data with `petropandas`** — from Excel to petropandas, crystallochemical formulas and end-members, filtering bad analyses by oxide totals and stoichiometry. *Exercise:* EPMA dataset → wt% oxides to apfu → valid analyses → charts | `slides/03_petropandas.pdf` | `notebooks/03_petropandas.ipynb` |
+| 13:30–15:00 | **Block 3: Petrological data with `petropandas`** — EPMA from Excel, formulas and end-members, filtering bad analyses. *Exercise:* wt% oxides → apfu → valid analyses → charts | `03_petropandas.pdf` | `03_petropandas.ipynb` |
 | 15:00–15:15 | *Coffee break* | | |
-| 15:15–16:30 | **Block 4: Bring your own data (BYOD)** — load and analyse data from your own thesis, consultations and debugging | `slides/04_byod.pdf` | `notebooks/04a_byod_structural.ipynb`, `notebooks/04b_byod_epma.ipynb` |
+| 15:15–16:30 | **Block 4: Bring your own data** — your own thesis data, consultations and debugging | `04_byod.pdf` | `04a_byod_structural.ipynb`<br>`04b_byod_epma.ipynb` |
+
+Slides are in [`slides/`](slides/), notebooks in [`notebooks/`](notebooks/).
 
 The teaching notebooks (01–03) each end with a hands-on exercise followed by a worked
 solution. The BYOD notebooks (04a, 04b) are **templates**: edit only the `CONFIG` cell at
