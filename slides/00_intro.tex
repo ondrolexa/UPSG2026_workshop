@@ -1,0 +1,224 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\input{common_setting}
+
+% Title information
+\title[Modern Workflow in Geology]{Modern Workflow in Geology}
+\subtitle{Process Structural and Petrological Data Efficiently}
+\author[O.\ Lexa]{Ondrej Lexa}
+\institute[Charles University]{
+  Institute of Petrology and Structural Geology (IPSG)\\
+  Charles University, Prague, Czechia
+}
+\date{8 October 2026}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+\section{Welcome}
+
+\begin{frame}{Today's Goal}
+  \begin{block}{Take home ready-made notebooks}
+    Jupyter notebooks into which you simply ``pour'' your own Excel tables ---
+    structural measurements or microprobe data --- and get stereograms,
+    recalculations and charts.
+  \end{block}
+  \vspace{0.3cm}
+  \textbf{Assumed:} basic Python, Jupyter Lab, and how a pandas
+  \texttt{DataFrame} works.\\[0.2cm]
+  \textbf{Tools:} \texttt{apsg} (structural geology) and \texttt{petropandas}
+  (petrology), both built on the scientific Python stack.
+\end{frame}
+
+\begin{frame}{Today's Schedule}
+  \centering
+  \small
+  \begin{tabularx}{0.92\textwidth}{lX}
+    \toprule
+    \textbf{Time} & \textbf{Block} \\
+    \midrule
+    09:00--09:30 & Introduction and preparation of the working environment \\
+    09:30--11:00 & \textbf{Block 1:} Structural geology with \texttt{apsg} \\
+    11:00--11:15 & \emph{Coffee break} \\
+    11:15--12:30 & \textbf{Block 2:} Advanced structural and tensor analysis \\
+    12:30--13:30 & \emph{Lunch break} \\
+    13:30--15:00 & \textbf{Block 3:} Processing petrological data with \texttt{petropandas} \\
+    15:00--15:15 & \emph{Coffee break} \\
+    15:15--16:30 & \textbf{Block 4:} Bring your own data (BYOD) \\
+    \bottomrule
+  \end{tabularx}
+\end{frame}
+
+\section{Scientific Python}
+
+\begin{frame}{The Scientific Python Stack}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \footnotesize
+      \begin{tabularx}{\textwidth}{lX}
+        \toprule
+        \texttt{numpy} & arrays, linear algebra \\
+        \texttt{pandas} & tables (\texttt{DataFrame}), Excel/CSV I/O \\
+        \texttt{matplotlib} & plotting, PDF/SVG export \\
+        \texttt{scipy} & statistics, optimisation \\
+        \texttt{jupyterlab} & notebooks in the browser \\
+        \midrule
+        \texttt{apsg} & orientation data, tensors \\
+        \texttt{petropandas} & mineral chemistry \\
+        \bottomrule
+      \end{tabularx}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Why bother?}
+        \small
+        \begin{itemize}
+          \item Every step is written down and re-runnable
+          \item Raw data are never edited by hand
+          \item 10 or 10\,000 measurements --- same code
+          \item Figures regenerate when data change
+          \item Free, open, and shared with the whole community
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{Installation}
+
+\begin{frame}[fragile]{Install with \texttt{uv}}
+  \small
+  \textbf{1. Install uv} (one-time; a fast Python project manager):
+  \begin{lstlisting}[style=shell]
+# Linux / macOS
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+  \end{lstlisting}
+  \textbf{2a. Use the workshop materials} (recommended --- exact tested versions):
+  \begin{lstlisting}[style=shell]
+cd UPSG2026_workshop    # cloned or unzipped (...-main) materials
+uv sync
+  \end{lstlisting}
+  \textbf{2b. \ldots or start your own project from scratch:}
+  \begin{lstlisting}[style=shell]
+uv init --bare --python 3.14 myproject && cd myproject
+uv add "apsg[lab]" "petropandas[lab]"
+  \end{lstlisting}
+  \textbf{3. Start Jupyter Lab:} \texttt{uv run jupyter lab}
+\end{frame}
+
+\begin{frame}[fragile]{Check the Installation}
+  Open a new notebook and run:
+  \begin{lstlisting}[style=python]
+import apsg, petropandas
+print(apsg.__version__, petropandas.__version__)   # 2.0.4 0.2.3
+
+from apsg import *
+quicknet(fol(120, 40), lin(210, 30))                # a stereonet should appear
+
+from petropandas import pd, Grt
+from petropandas.data import minerals
+minerals.oxides.select("Garnet", on="Mineral").mineral.end_members(Grt).head()
+  \end{lstlisting}
+  \vspace{0.2cm}
+  \small
+  \begin{itemize}
+    \item Notebooks live in \texttt{notebooks/}, example data in \texttt{notebooks/data/},
+          your results go to \texttt{notebooks/output/}
+    \item Problems? Raise your hand now --- everything later builds on this
+  \end{itemize}
+\end{frame}
+
+\section{Two Philosophies}
+
+\begin{frame}[fragile]{\texttt{apsg}: Object-Oriented}
+  \begin{columns}[T]
+    \begin{column}{0.55\textwidth}
+      \begin{lstlisting}[style=python]
+from apsg import *
+
+f = fol(250, 40)           # a plane
+l = f ** fol(160, 30)      # intersection line
+S = folset.random_fisher(
+      position=f, kappa=20)  # a set of planes
+S.ortensor().eigenlins()   # principal axes
+
+F = defgrad.from_comp(xx=2, zz=0.5)
+S.transform(F)             # deform the set
+
+s = StereoNet()
+s.great_circle(S); s.line(l); s.show()
+      \end{lstlisting}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \small
+      \begin{itemize}
+        \item Data are \textbf{objects that know what they are}: a
+              \texttt{lin} is not a \texttt{fol}, a \texttt{fault} has a sense
+        \item Operators have geological meaning: \texttt{**} intersection,
+              \texttt{@} tensor product
+        \item Sets carry statistics; tensors transform anything
+        \item Stereonets understand every object type
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{petropandas}: DataFrame Integration}
+  \begin{columns}[T]
+    \begin{column}{0.55\textwidth}
+      \begin{lstlisting}[style=python]
+from petropandas import pd, Grt
+
+df = pd.read_excel("epma_export.xlsx")
+df.oxides()                # oxide columns
+df.moles()                 # molar proportions
+df.cations(n_oxygens=12)   # APFU
+df.mineral.end_members(Grt)
+df.mineral.check_stoichiometry(Grt)
+      \end{lstlisting}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \small
+      \begin{itemize}
+        \item No new data structure --- your table \textbf{stays a
+              \texttt{DataFrame}}
+        \item Functionality hangs off \textbf{accessors}:
+              \texttt{df.oxides}, \texttt{df.moles}, \texttt{df.cations},
+              \texttt{df.mineral}, \texttt{df.bulk}
+        \item All of pandas still works: filtering, grouping, \texttt{to\_excel}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \vspace{0.3cm}
+  \begin{block}{Bridge}
+    \texttt{apsg} also has DataFrame accessors: \texttt{df.fol()}, \texttt{df.lin()},
+    \texttt{df.fault()} turn table columns into \texttt{apsg} sets.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Materials}
+  \centering
+  \small
+  \begin{tabularx}{0.92\textwidth}{lX}
+    \toprule
+    \textbf{Notebook} & \textbf{Content} \\
+    \midrule
+    \texttt{01\_apsg\_basics} & Block 1: features, stereonets, statistics, fold axes \\
+    \texttt{02\_apsg\_advanced} & Block 2: faults, strain, progressive deformation, stress inversion \\
+    \texttt{03\_petropandas} & Block 3: EPMA export $\rightarrow$ formulas, end-members, QC, charts \\
+    \texttt{04a\_byod\_structural} & Block 4 template: your field data $\rightarrow$ stereonets + statistics \\
+    \texttt{04b\_byod\_epma} & Block 4 template: your microprobe data $\rightarrow$ tables + charts \\
+    \bottomrule
+  \end{tabularx}
+
+  \vspace{0.4cm}
+  \raggedright
+  Each teaching notebook ends with a hands-on exercise and a worked solution.
+  Example data: \texttt{notebooks/data/}.
+\end{frame}
+
+\end{document}

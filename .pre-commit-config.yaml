@@ -1,0 +1,7 @@
+# Strip outputs and execution counts from notebooks before they are committed.
+# Enable once per clone with: pre-commit install
+repos:
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.9.1
+    hooks:
+      - id: nbstripout

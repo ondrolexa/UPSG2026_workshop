@@ -1,0 +1,19 @@
+# uv virtual environment (recreate with `uv sync`)
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# written by the notebooks at run time
+notebooks/output/
+
+# LaTeX build files (slide PDFs are committed)
+slides/*.aux
+slides/*.log
+slides/*.nav
+slides/*.out
+slides/*.snm
+slides/*.toc
+slides/*.vrb
+
+# local Claude Code settings
+.claude/settings.local.json

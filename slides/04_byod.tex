@@ -1,0 +1,163 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\input{common_setting}
+
+% Title information
+\title[BYOD]{Bring Your Own Data}
+\subtitle{Block 4 --- Modern Workflow in Geology}
+\author[O.\ Lexa]{Ondrej Lexa}
+\institute[Charles University]{
+  Institute of Petrology and Structural Geology (IPSG)\\
+  Charles University, Prague, Czechia
+}
+\date{8 October 2026}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+\begin{frame}{This Block (15:15--16:30)}
+  \begin{block}{Objective}
+    Load and analyse data from your own thesis --- with time for
+    consultations and debugging.
+  \end{block}
+  \vspace{0.3cm}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{\texttt{04a\_byod\_structural.ipynb}}
+      \small
+      \begin{itemize}
+        \item Field measurements (CSV/Excel, long or wide table)
+        \item Stereonet per structure + summary with fold axis
+        \item Statistics table; optional fault stress inversion
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{\texttt{04b\_byod\_epma.ipynb}}
+      \small
+      \begin{itemize}
+        \item Microprobe export (Excel/CSV)
+        \item APFU, end-members, QC per mineral
+        \item Ternary/scatter/profile charts, one results workbook
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{Using the Templates}
+
+\begin{frame}{Three Steps}
+  \begin{enumerate}
+    \item \textbf{Copy} the template (keep the original as reference) and your data
+          file into \texttt{notebooks/data/}
+    \item Edit \textbf{only the \texttt{CONFIG} cell}: file name, sheet, column names,
+          which structures/minerals to process
+    \item \emph{Run $\rightarrow$ Run All Cells} and look in \texttt{notebooks/output/}
+  \end{enumerate}
+  \vspace{0.4cm}
+  \begin{alertblock}{Golden rule}
+    Never edit the raw data file to ``make it work''. Fix things in code
+    (\texttt{RENAME}, \texttt{SKIPROWS}, filters) so the path from raw data to
+    figure stays reproducible.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]{Structural Template --- \texttt{CONFIG}}
+  \begin{lstlisting}[style=python]
+PROJECT = "field"                              # used in output file names
+FILE = Path("data/field_measurements.csv")     # .csv, .xlsx or .xls
+LAYOUT = "long"          # "long": structure column + azi, inc | "wide": S1_azi, S1_inc, ...
+STRUCTURE_COL = "structure"
+AZI_COL, INC_COL = "azi", "inc"
+PLANE_NOTATION = "dd"    # "dd" dip direction/dip | "rhr" right-hand-rule strike/dip
+PLANES = ["S0", "S1"]
+LINES = ["L1"]
+FOLDED = "S0"            # surface whose pi-girdle gives the fold axis (or None)
+FAULTS = Path("data/mele.csv")  # fazi, finc, lazi, linc, sense (or None)
+FAULT_SENSE_LETTERS = False     # True if sense is coded n/r/s/d instead of 1/-1
+  \end{lstlisting}
+  \small Output: \texttt{<PROJECT>\_<structure>.pdf}, \texttt{\_summary.pdf},
+  \texttt{\_faults\_*.pdf}, \texttt{\_apsg.xlsx} (statistics, data, stress inversion)
+\end{frame}
+
+\begin{frame}[fragile]{EPMA Template --- \texttt{CONFIG}}
+  \begin{lstlisting}[style=python]
+SAMPLE = "S12"
+FILE = Path("data/epma_export.xlsx")
+SHEET = "Spots"
+SKIPROWS = 0                        # header lines above the column names
+RENAME = {}                         # e.g. {"SiO2(Mass%)": "SiO2"}
+MINERAL_COLUMN = None               # a column that already holds the mineral ...
+MINERAL_FROM = ("Comment", r"_([a-z]+)_")   # ... or a regex applied to a column
+MINERALS = {"grt": (Grt, (98.5, 101.5)),    # label -> (mineral, total window)
+            "pl":  (Fsp, (98.5, 101.5)),
+            "bt":  (Bt,  (94.0, 97.5))}
+MIN_QUALITY = 0.95                  # stoichiometry_quality threshold
+PROFILE = ("Grt-profile", "Distance_um")    # optional traverse sheet, or None
+  \end{lstlisting}
+  \small Output: QC summary, \texttt{<SAMPLE>\_*.pdf} charts, \texttt{<SAMPLE>\_petropandas.xlsx}
+\end{frame}
+
+\section{Common Pitfalls}
+
+\begin{frame}{Structural Data}
+  \small
+  \begin{tabularx}{\textwidth}{l>{\raggedright\arraybackslash}X}
+    \toprule
+    \textbf{Symptom} & \textbf{Likely cause / fix} \\
+    \midrule
+    Planes plot 90\textdegree{} off & strike/dip given as dip direction/dip --- set
+      \texttt{PLANE\_NOTATION = "rhr"} (or quadrant strings: \texttt{fol("N30E,40NW")}) \\
+    Poles where planes should be & plotted with \texttt{s.line} instead of
+      \texttt{s.pole} / \texttt{s.great\_circle} \\
+    Fold axis nonsense & mixed limbs of several fold generations, or a cluster instead
+      of a girdle --- check \texttt{P}/\texttt{G} in the statistics table \\
+    Stress inversion unstable & sense coding: \texttt{1} normal, \texttt{-1} reverse
+      (letters \texttt{n/r/s/d}: set \texttt{FAULT\_SENSE\_LETTERS = True}); mixed
+      fault populations --- filter by misfit \\
+    Rows silently missing & empty cells --- accessors skip rows with NaN \\
+    \bottomrule
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{Microprobe Data}
+  \small
+  \begin{tabularx}{\textwidth}{l>{\raggedright\arraybackslash}X}
+    \toprule
+    \textbf{Symptom} & \textbf{Likely cause / fix} \\
+    \midrule
+    Oxide missing from \texttt{df.oxides()} & odd header (\texttt{SiO2 wt\%}, \texttt{SiO2(Mass\%)})
+      --- add to \texttt{RENAME}; \texttt{FeO*}, \texttt{FeOT}, \texttt{H2O+} work as-is \\
+    Header is garbage & instrument writes lines above the table --- set \texttt{SKIPROWS} \\
+    Numbers read as text & decimal comma or ``\texttt{<LOD}'' strings ---
+      \texttt{pd.read\_csv(..., decimal=",")}, \texttt{pd.to\_numeric(errors="coerce")} \\
+    Fe\textsuperscript{3+} looks wrong & both \texttt{FeO} and \texttt{Fe2O3} present, or
+      wrong mineral object (\texttt{Grt} vs.\ \texttt{GrtFe3}) \\
+    Everything rejected & total window too tight for hydrous minerals, or wrong
+      mineral label mapping in \texttt{MINERALS} \\
+    \bottomrule
+  \end{tabularx}
+\end{frame}
+
+\section{Wrap-up}
+
+\begin{frame}{Where to Go Next}
+  \begin{itemize}
+    \item \textbf{Documentation \& tutorial notebooks}
+          \begin{itemize}
+            \item \texttt{github.com/ondrolexa/apsg}
+            \item \texttt{github.com/ondrolexa/petropandas}
+          \end{itemize}
+    \item \textbf{Keep your project reproducible}: one \texttt{uv} project per thesis,
+          raw data read-only, notebooks under version control (git)
+    \item \textbf{Grow the templates}: they are ordinary notebooks --- add cells, cite
+          the code in your methods section
+    \item \textbf{Bugs and wishes}: GitHub issues on either repository
+  \end{itemize}
+  \vspace{0.5cm}
+  \centering \Large Thank you --- now, your data!
+\end{frame}
+
+\end{document}

@@ -1,0 +1,10 @@
+[project]
+name = "upsg2026-workshop"
+version = "0.1.0"
+requires-python = ">=3.14"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+    "apsg[lab]>=2.0.4",
+    "petropandas[lab]>=0.2.3",
+]

@@ -1,0 +1,63 @@
+% common_setting.tex
+% Shared preamble for the five PSPDE2026 workshop beamer decks (00-04).
+% \input this right after \documentclass in each deck.
+% Requires xelatex (fontspec/unicode-math need XeTeX or LuaTeX, not pdflatex).
+
+% Fonts
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont{Liberation Sans}
+\setsansfont{Liberation Sans}
+\setmonofont{Liberation Mono}[Scale=0.85]
+\setmathfont{Latin Modern Math}
+
+% Theme and colors
+\usetheme{moloch}
+\molochset{
+  block=fill,
+  progressbar=frametitle,
+  sectionpage=progressbar,
+}
+\setbeamertemplate{page number in head/foot}[totalframenumber]
+
+% Graphics
+\usepackage{graphicx}
+\graphicspath{{./figures/}}
+
+% Tables
+\usepackage{booktabs}
+\usepackage{tabularx}
+
+% Unnumbered captions without the "Figure:" label prefix
+\usepackage{caption}
+\captionsetup{labelformat=empty}
+
+% Code listings
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{codebg}{RGB}{245,245,245}
+% moloch's own accent colors, aliased under their original Metropolis names
+\colorlet{mAlertFg}{mLightBrown}
+\colorlet{mExampleFg}{mLightGreen}
+\lstdefinestyle{python}{
+  language=Python,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{mAlertFg}\bfseries,
+  commentstyle=\color{mExampleFg}\itshape,
+  stringstyle=\color{mExampleFg!70!black},
+  backgroundcolor=\color{codebg},
+  rulecolor=\color{black!15},
+  frame=single,
+  breaklines=true,
+  showstringspaces=false,
+  columns=fullflexible,
+  numbers=none
+}
+\lstdefinestyle{shell}{
+  basicstyle=\ttfamily\scriptsize,
+  backgroundcolor=\color{codebg},
+  rulecolor=\color{black!15},
+  frame=single,
+  breaklines=true,
+  columns=fullflexible
+}
