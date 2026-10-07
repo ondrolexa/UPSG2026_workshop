@@ -15,7 +15,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 ## 2a. Use the workshop materials (recommended)
 
 The materials ship `pyproject.toml` and `uv.lock` with the exact versions the notebooks
-were tested with (apsg 2.0.4, petropandas 0.2.3, Python 3.14):
+were tested with (apsg 2.0.5, petropandas 0.2.3, Python 3.14):
 
 ```bash
 cd UPSG2026_workshop      # or UPSG2026_workshop-main (from the ZIP)

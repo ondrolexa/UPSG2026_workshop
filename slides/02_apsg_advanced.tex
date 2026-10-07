@@ -153,6 +153,8 @@ s.line(Lr.transform(F), color="k", ms=2)
 B = ellipsoid.from_defgrad(F)       # Finger tensor B = F F^T
 B.Rxy, B.Ryz, B.k, B.lode           # 2.25, 2.25, 1.00, 0.00
 B.eigenlins()                       # X, Y, Z directions: L:0/6, L:270/0, L:180/84
+V = B.defgrad()                     # symmetric stretch V, the same as F.V
+np.allclose(V @ F.R, F)             # True: F = V R, rotation R is not in B
   \end{lstlisting}
   \vspace{0.3cm}
   \begin{itemize}
@@ -305,8 +307,11 @@ S.shear_stress(n)              # 2.34
 S.slip_tendency(n)             # 0.51
 S.fault(n)          # predicted slip (Wallace-Bott)
 
+rot = rotation.from_axisangle(lin(120, 50), 40)
+Sr = S.transform(rot)          # oblique axes
+lin(Sr.sigma1dir)              # L:210/25
 g = StereoGrid()
-g.apply_func(S.slip_tendency)
+g.apply_func(Sr.slip_tendency)
 StereoNet().contour(g, colorbar=True)
       \end{lstlisting}
       \small Geological convention: \textbf{compression positive}.
@@ -349,19 +354,19 @@ Smele.shape_ratio      # 0.59
 misfit = faults.angular_misfit(Smele)
 np.median(misfit)      # 22.9 deg
 
-boot = faults.stress_inversion(
+boot = faults.stress_inversion(   # Stress3Set
            bootstrap=True, n=100)
 s = StereoNet()
 s.hoeppner(faults, color="0.6")
-s.line(G([lin(b.sigma1dir) for b in boot]), color="r")
-s.stress(Smele)
+s.tensor(boot, planes=False, ms=2, alpha=0.4)
+s.stress(Smele, mec="k")
       \end{lstlisting}
     \end{column}
     \begin{column}{0.44\textwidth}
       \begin{figure}
         \centering
         \includegraphics[width=\textwidth,height=0.68\textheight,keepaspectratio]{nb_stress_inversion.png}
-        \caption*{\footnotesize $\sigma_1$ (red), $\sigma_3$ (blue): bootstrap clouds}
+        \caption*{\footnotesize bootstrap $\sigma_{1,2,3}$: red, green, blue}
       \end{figure}
     \end{column}
   \end{columns}

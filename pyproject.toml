@@ -5,6 +5,6 @@ requires-python = ">=3.14"
 license = "MIT"
 license-files = ["LICENSE"]
 dependencies = [
-    "apsg[lab]>=2.0.4",
+    "apsg[lab]>=2.0.5",
     "petropandas[lab]>=0.2.3",
 ]
